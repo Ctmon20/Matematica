@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Raciocínio Rápido | Neon Edition</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --neon-blue: #00f3ff;
+            --neon-purple: #bc13fe;
+            --neon-green: #39ff14;
+            --neon-red: #ff3131;
+            --bg-dark: #050505;
+            --current-color: var(--neon-blue);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            background: var(--bg-dark);
+            color: white;
+            font-family: 'Rajdhani', sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+            padding-bottom: 70px;
+        }
+
+        /* Título Principal */
+        .app-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: var(--current-color);
+            text-shadow: 0 0 15px var(--current-color);
+            margin-bottom: 20px;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            transition: 0.5s;
+        }
+
+        .grid-bg {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: linear-gradient(var(--bg-dark) 95%, var(--current-color) 95%),
+                              linear-gradient(90deg, var(--bg-dark) 95%, var(--current-color) 95%);
+            background-size: 40px 40px;
+            opacity: 0.1;
+            z-index: -1;
+            transition: 0.5s;
+        }
+
+        #game-hull {
+            width: 95%;
+            max-width: 480px;
+            background: rgba(10, 10, 15, 0.95);
+            border: 2px solid var(--current-color);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(0, 243, 255, 0.1);
+            position: relative;
+        }
+
+        .phase-header {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.7rem;
+            letter-spacing: 3px;
+            color: var(--current-color);
+            margin-bottom: 15px;
+        }
+
+        #timer-container {
+            width: 70px;
+            height: 70px;
+            border: 3px solid var(--current-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.4rem;
+        }
+
+        #question {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3.5rem;
+            font-weight: 900;
+            margin: 15px 0;
+        }
+
+        #answer-input {
+            background: rgba(255,255,255,0.05);
+            border: none;
+            border-bottom: 2px solid var(--current-color);
+            color: white;
+            font-size: 2.5rem;
+            text-align: center;
+            width: 100%;
+            padding: 10px;
+            outline: none;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 10px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .screen { display: none; }
+        .active { display: block; }
+
+        button {
+            background: var(--current-color);
+            color: black;
+            border: none;
+            padding: 18px 40px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            cursor: pointer;
+            width: 100%;
+            border-radius: 5px;
+        }
+
+        #ad-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            background: rgba(0,0,0,0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            border-top: 1px solid var(--current-color);
+        }
+
+        .error-shake { animation: shake 0.4s; border-color: var(--neon-red) !important; }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            75% { transform: translateX(8px); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="grid-bg" id="grid"></div>
+
+    <h1 class="app-title" id="main-title">Raciocínio Rápido</h1>
+
+    <div id="game-hull">
+        <div id="start-screen" class="screen active">
+            <p style="font-size: 0.9rem; letter-spacing: 2px; margin-bottom: 30px; color: #666;">PROTOCOLO NEON // ÁUDIO ATIVO</p>
+            <button onclick="startGame()">ACESSAR SISTEMA</button>
+        </div>
+
+        <div id="game-screen" class="screen">
+            <div class="phase-header" id="phase-label">FASE 1 // KERNEL</div>
+            <div id="timer-container"><span id="timer">60</span></div>
+            <div id="question">--</div>
+            <input type="number" id="answer-input" inputmode="numeric" placeholder="??">
+            
+            <div class="stats-grid">
+                <div class="stat-card">SCORE: <span id="score">0</span></div>
+                <div class="stat-card">ALVO: <span id="target">50</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="ad-footer">
+        <script type="text/javascript">
+            atOptions = {
+                'key' : '2a5e7302edec5e07fb8153e06aa96446',
+                'format' : 'iframe',
+                'height' : 50,
+                'width' : 320,
+                'params' : {}
+            };
+        </script>
+        <script type="text/javascript" src="https://www.highperformanceformat.com/2a5e7302edec5e07fb8153e06aa96446/invoke.js"></script>
+    </div>
+
+    <script>
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            if (type === 'correct') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+            } else {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.3);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.3);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+            }
+        }
+
+        const phases = [
+            { name: "FASE 1 // KERNEL", target: 50, color: "#00f3ff", ops: ['+'], range: 10 },
+            { name: "FASE 2 // FIREWALL", target: 150, color: "#bc13fe", ops: ['+', '-'], range: 25 },
+            { name: "FASE 3 // MAINFRAME", target: 400, color: "#39ff14", ops: ['*', '+'], range: 12 },
+            { name: "FASE 4 // SINGULARITY", target: 1000, color: "#ff3131", ops: ['/', '*'], range: 20 }
+        ];
+
+        let currentPhase = 0;
+        let score = 0;
+        let timeLeft = 60;
+        let timerInterval;
+        let currentAnswer;
+
+        const input = document.getElementById('answer-input');
+        const hull = document.getElementById('game-hull');
+        const mainTitle = document.getElementById('main-title');
+
+        function startGame() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById('game-screen').classList.add('active');
+            updateUI();
+            newQuestion();
+            input.focus();
+        }
+
+        function startTimer() {
+            timeLeft = 60;
+            document.getElementById('timer').innerText = timeLeft;
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timer').innerText = timeLeft;
+                if(timeLeft <= 0) handleWrong();
+            }, 1000);
+        }
+
+        function newQuestion() {
+            const p = phases[currentPhase];
+            const op = p.ops[Math.floor(Math.random() * p.ops.length)];
+            let n1, n2;
+
+            if (op === '*') { n1 = Math.floor(Math.random() * p.range) + 2; n2 = Math.floor(Math.random() * 10) + 2; }
+            else if (op === '/') { n2 = Math.floor(Math.random() * 8) + 2; n1 = n2 * (Math.floor(Math.random() * 10) + 1); }
+            else { n1 = Math.floor(Math.random() * p.range) + 1; n2 = Math.floor(Math.random() * p.range) + 1; }
+
+            currentAnswer = eval(`${n1}${op}${n2}`);
+            document.getElementById('question').innerText = `${n1}${op === '*' ? '×' : op === '/' ? '÷' : op}${n2}`;
+            input.value = '';
+            startTimer();
+        }
+
+        input.addEventListener('input', () => {
+            const val = parseInt(input.value);
+            if (val === currentAnswer) {
+                playSound('correct');
+                score += 10;
+                document.getElementById('score').innerText = score;
+                if (score >= phases[currentPhase].target && currentPhase < phases.length - 1) {
+                    currentPhase++;
+                    updateUI();
+                }
+                newQuestion();
+            } else if (input.value.length >= currentAnswer.toString().length) {
+                if (val !== currentAnswer) handleWrong();
+            }
+        });
+
+        function handleWrong() {
+            playSound('wrong');
+            score = Math.max(0, score - 15);
+            document.getElementById('score').innerText = score;
+            hull.classList.add('error-shake');
+            setTimeout(() => hull.classList.remove('error-shake'), 400);
+            newQuestion();
+        }
+
+        function updateUI() {
+            const p = phases[currentPhase];
+            document.documentElement.style.setProperty('--current-color', p.color);
+            document.getElementById('phase-label').innerText = p.name;
+            document.getElementById('target').innerText = p.target;
+            mainTitle.style.color = p.color;
+            mainTitle.style.textShadow = `0 0 15px ${p.color}`;
+            const adFooter = document.getElementById('ad-footer');
+            if(adFooter) adFooter.style.borderColor = p.color;
+        }
+    </script>
+</body>
+</html>
