@@ -267,20 +267,39 @@
         </div>
     </div>
 
-    <div id="ad-footer">
-        <script type="text/javascript">
-            atOptions = {
-                'key' : '2a5e7302edec5e07fb8153e06aa96446',
-                'format' : 'iframe',
-                'height' : 50,
-                'width' : 320,
-                'params' : {}
-            };
-        </script>
-        <script type="text/javascript" src="https://www.highperformanceformat.com/2a5e7302edec5e07fb8153e06aa96446/invoke.js"></script>
-    </div>
+    <div id="ad-footer"></div>
 
     <script>
+        // --- LÓGICA DE ATUALIZAÇÃO DO ANÚNCIO ---
+        function refreshAd() {
+            const adContainer = document.getElementById('ad-footer');
+            adContainer.innerHTML = ''; // Limpa o anúncio anterior
+            
+            const scriptConfig = document.createElement('script');
+            scriptConfig.type = 'text/javascript';
+            scriptConfig.text = `
+                atOptions = {
+                    'key' : '2a5e7302edec5e07fb8153e06aa96446',
+                    'format' : 'iframe',
+                    'height' : 50,
+                    'width' : 320,
+                    'params' : {}
+                };
+            `;
+            
+            const scriptInvoke = document.createElement('script');
+            scriptInvoke.type = 'text/javascript';
+            scriptInvoke.src = 'https://www.highperformanceformat.com/2a5e7302edec5e07fb8153e06aa96446/invoke.js';
+            
+            adContainer.appendChild(scriptConfig);
+            adContainer.appendChild(scriptInvoke);
+        }
+
+        // Inicia o primeiro anúncio e define o intervalo de 30 segundos
+        refreshAd();
+        setInterval(refreshAd, 30000); 
+
+        // --- SEU CÓDIGO ORIGINAL ABAIXO ---
         const phases = [
             { name: "FASE 1 // KERNEL", target: 50, color: "#00f3ff", ops: ['+'], range: 10 },
             { name: "FASE 2 // FIREWALL", target: 150, color: "#bc13fe", ops: ['+', '-'], range: 25 },
